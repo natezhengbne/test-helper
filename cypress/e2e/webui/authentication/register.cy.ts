@@ -36,4 +36,25 @@ describe("new user", () => {
 			cy.get("[data-id=myAccountPage_pageHeader]").should("be.visible");
 		});
 	});
+
+	context("email suggestion", () => {
+		it("can display and select the suggestion", () => {
+			cy.visit(LOGIN_PAGE);
+			cy.get("input#loginRegisterEmail_email").type("xxxx@gnail.com");
+			cy.get("[data-id=loginRegisterEmail_submit]").click();
+			cy.get("[data-id=emailTypoSuggestion]").contains("xxxx@gmail.com").click();
+
+			cy.get("input#signup_form_email").should("have.value", "xxxx@gmail.com");
+		});
+
+		it("can ignore the suggestion", () => {
+			cy.visit(LOGIN_PAGE);
+			cy.get("input#loginRegisterEmail_email").type("xxxx@gnail.com");
+			cy.get("[data-id=loginRegisterEmail_submit]").click();
+			cy.get("[data-id=emailTypoSuggestion]").contains("xxxx@gmail.com");
+			cy.get("[data-id=loginRegisterEmail_submit]").click();
+
+			cy.get("input#signup_form_email").should("have.value", "xxxx@gnail.com");
+		});
+	})
 });
