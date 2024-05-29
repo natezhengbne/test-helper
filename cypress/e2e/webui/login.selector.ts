@@ -4,6 +4,17 @@ import { RegisterUserForm } from "./types";
 export const generateRandomEmail = () =>
 	`${Math.trunc(Math.random() * 1000000)}@random-email.com`;
 
+/**
+ * behaviour:
+ *  - type the email
+ *  - hit the Continue button
+ * @param email type email to see if it is a new one or existing one
+ */
+export const checkEmail = (email: string) => {
+	cy.getByDataId(loginDataId.email).type(email);
+	cy.getByDataId(loginDataId.continueButton).click();
+}
+
 type CreateUserProps = {
 	user?: RegisterUserForm;
 	options?: {
@@ -15,8 +26,7 @@ export const createUser = ({ user, options }: CreateUserProps = {}) => {
 	cy.intercept("POST", "check-email").as("check-email");
 
 	const email = user?.email ?? generateRandomEmail();
-	cy.getByDataId(loginDataId.email).type(email);
-	cy.getByDataId(loginDataId.continueButton).click();
+	checkEmail(email);
 	cy.wait("@check-email").its("response.statusCode").should("eq", 200);
 
 	cy.get("body").then(($body) => {
