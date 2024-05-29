@@ -1,8 +1,8 @@
 import {
 	createUser,
 	generateRandomEmail,
-	loginPageEmailField,
-	loginPagePasswordField,
+	loginDataId,
+	registerDataId,
 } from "../login.selector";
 import {
 	DEFAULT_VALID_PASSWORD,
@@ -34,11 +34,11 @@ describe("exist user", () => {
 
 	context("login success", () => {
 		it("can finish login process", () => {
-			cy.get(loginPageEmailField).type(EXISTING_EMAIL);
-			cy.contains("button", "Continue").click();
+			cy.getByDataId(loginDataId.email).type(EXISTING_EMAIL);
+			cy.getByDataId(loginDataId.continueButton).click();
 
-			cy.get(loginPagePasswordField).type(DEFAULT_VALID_PASSWORD);
-			cy.contains("button", "Login").click();
+			cy.get(loginDataId.password).type(DEFAULT_VALID_PASSWORD);
+			cy.getByDataId(loginDataId.loginButton).click();
 
 			cy.get("[data-id=myAccountPage_pageHeader]").should("be.visible");
 			cy.contains("a", "Logout").click();
@@ -47,20 +47,20 @@ describe("exist user", () => {
 
 	context("but typo email", () => {
 		it("can redirect to login page when correct the email", () => {
-			cy.get("input#loginRegisterEmail_email").type(generateRandomEmail());
-			cy.get("[data-id=loginRegisterEmail_submit]").click();
+			cy.getByDataId(loginDataId.email).type(generateRandomEmail());
+			cy.getByDataId(loginDataId.continueButton).click();
 
-			cy.get("input#signup_form_email")
+			cy.getByDataId(registerDataId.email)
 				.should("be.visible")
 				.clear()
 				.type(EXISTING_EMAIL)
 				.blur();
 
-			cy.get("input#LoginRegister_Login_password")
+			cy.get(loginDataId.password)
 				.should("be.visible")
 				.type(DEFAULT_VALID_PASSWORD);
 
-			cy.get("[data-id=LoginRegister_Login_submitButton]").click();
+			cy.getByDataId(loginDataId.loginButton).click();
 
 			cy.get("[data-id=myAccountPage_pageHeader]").should("be.visible");
 		});

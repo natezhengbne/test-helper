@@ -1,33 +1,33 @@
 import { DEFAULT_VALID_PASSWORD } from "./constants";
-import { UserForm } from "./types";
+import { RegisterUserForm } from "./types";
 
 export const generateRandomEmail = () =>
 	`${Math.trunc(Math.random() * 1000000)}@random-email.com`;
 
 type CreateUserProps = {
-	user?: UserForm;
+	user?: RegisterUserForm;
 	options?: {
 		logoutAfterSignup?: boolean;
 	};
 };
 
 export const createUser = ({ user, options }: CreateUserProps = {}) => {
-    cy.intercept("POST", "check-email").as("check-email");
+	cy.intercept("POST", "check-email").as("check-email");
 
 	const email = user?.email ?? generateRandomEmail();
-	cy.get("input#loginRegisterEmail_email").type(email);
-	cy.contains("button", "Continue").click();
-    cy.wait("@check-email").its("response.statusCode").should("eq", 200);
+	cy.getByDataId(loginDataId.email).type(email);
+	cy.getByDataId(loginDataId.continueButton).click();
+	cy.wait("@check-email").its("response.statusCode").should("eq", 200);
 
 	cy.get("body").then(($body) => {
 		const shouldSignup =
-			$body.find("[data-id=htmlInput_signup_form_email]").length > 0;
+			$body.find(`[data-id=${registerDataId.email}]`).length > 0;
 		if (shouldSignup) {
-			cy.get("input#signup_form_password").type(DEFAULT_VALID_PASSWORD);
-			cy.get("input#signup_form_firstname").type(user?.firstName ?? "Rocky");
-			cy.get("input#signup_form_lastname").type(user?.lastName ?? "Rocket");
+			cy.getByDataId(registerDataId.password).type(DEFAULT_VALID_PASSWORD);
+			cy.getByDataId(registerDataId.firstName).type(user?.firstName ?? "Rocky");
+			cy.getByDataId(registerDataId.lastName).type(user?.lastName ?? "Rocket");
 
-			cy.get("[data-id=htmlControlContainer_wrapper_signup_form_dob]")
+			cy.getByDataId(registerDataId.dob)
 				.click()
 				.get("select#day")
 				.select(user?.birthday?.day ?? "01")
@@ -36,13 +36,13 @@ export const createUser = ({ user, options }: CreateUserProps = {}) => {
 				.get("select#year")
 				.select(user?.birthday?.year ?? "2005");
 
-			cy.get("input#autocomplete")
+			cy.getByDataId(registerDataId.addressAutocomplete)
 				.type(user?.addressAutocomplete ?? "1 Queen Street, VIC")
-				.get("[data-id=addressAutoComplete_suggestion]")
+				.getByDataId(registerDataId.addressSuggestion)
 				.first()
 				.click();
 
-			cy.get("input#signup_form_phone").type("0400000000");
+			cy.getByDataId(registerDataId.phone).type("0400000000");
 
 			// click it if present
 			cy.get("label#checkboxField_signup_form_agree")
@@ -53,7 +53,7 @@ export const createUser = ({ user, options }: CreateUserProps = {}) => {
 					}
 				});
 
-			cy.contains("button", "Create Account").click();
+			cy.getByDataId(registerDataId.submitButton).click();
 
 			if (options?.logoutAfterSignup) {
 				return cy.contains("a", "Logout").click();
@@ -70,5 +70,22 @@ export const createUser = ({ user, options }: CreateUserProps = {}) => {
 	return cy.log(`${email} able to login now`);
 };
 
-export const loginPageEmailField = "input#loginRegisterEmail_email";
-export const loginPagePasswordField = "input#LoginRegister_Login_password";
+export const loginDataId = {
+	email: "htmlInput_loginRegisterEmail_email",
+	password: "htmlInput_LoginRegister_Login_password",
+	typoSuggestion: "emailTypoSuggestion_emailCorrectionSuggestionLink",
+	continueButton: "loginRegisterEmail_submit",
+	loginButton: "LoginRegister_Login_submitButton",
+}
+
+export const registerDataId = {
+	email: "htmlInput_signup_form_email",
+	password: "htmlInput_signup_form_password",
+	firstName: "htmlInput_signup_form_firstname",
+	lastName: "htmlInput_signup_form_lastname",
+	dob: "htmlControlContainer_wrapper_signup_form_dob",
+	addressAutocomplete: "htmlInput_autocomplete",
+	addressSuggestion: "addressAutoComplete_suggestion",
+	phone: "htmlInput_signup_form_phone",
+	submitButton: "signup_form_submitButton",
+};

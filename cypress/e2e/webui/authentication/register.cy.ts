@@ -1,4 +1,4 @@
-import { createUser, loginPageEmailField } from "../login.selector";
+import { createUser, loginDataId, registerDataId } from "../login.selector";
 import { LOGIN_PAGE } from "../constants";
 
 describe("new user", () => {
@@ -12,24 +12,30 @@ describe("new user", () => {
 	context("email suggestion", () => {
 		it("can display and select the suggestion", () => {
 			cy.visit(LOGIN_PAGE);
-			cy.get(loginPageEmailField).type("xxxx@gnail.com");
-			cy.contains("button", "Continue").click();
+			cy.getByDataId(loginDataId.email).type("xxxx@gnail.com");
+			cy.getByDataId(loginDataId.continueButton).click();
 
-			cy.get("[data-id=emailTypoSuggestion]")
+			cy.getByDataId(loginDataId.typoSuggestion)
 				.contains("xxxx@gmail.com")
 				.click();
-			cy.get("input#signup_form_email").should("have.value", "xxxx@gmail.com");
+			cy.getByDataId(registerDataId.email).should(
+				"have.value",
+				"xxxx@gmail.com"
+			);
 		});
 
 		it("can ignore the suggestion", () => {
 			cy.visit(LOGIN_PAGE);
-			cy.get(loginPageEmailField).type("xxxx@gnail.com");
-			cy.contains("button", "Continue").click();
+			cy.getDataId(loginDataId.email).type("xxxx@gnail.com");
+			cy.getByDataId(loginDataId.continueButton).click();
 
-			cy.get("[data-id=emailTypoSuggestion]").contains("xxxx@gmail.com");
-			cy.contains("button", "Continue").click();
+			cy.getByDataId(loginDataId.typoSuggestion).contains("xxxx@gmail.com");
+			cy.getByDataId(loginDataId.continueButton).click();
 
-			cy.get("input#signup_form_email").should("have.value", "xxxx@gnail.com");
+			cy.getByDataId(registerDataId.email).should(
+				"have.value",
+				"xxxx@gnail.com"
+			);
 		});
 	});
 });

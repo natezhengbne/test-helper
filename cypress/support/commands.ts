@@ -25,16 +25,14 @@
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
 //
-// declare global {
-//   namespace Cypress {
-//     interface Chainable {
-//       login(email: string, password: string): Chainable<void>
-//       drag(subject: string, options?: Partial<TypeOptions>): Chainable<Element>
-//       dismiss(subject: string, options?: Partial<TypeOptions>): Chainable<Element>
-//       visit(originalFn: CommandOriginalFn, url: string, options: Partial<VisitOptions>): Chainable<Element>
-//     }
-//   }
-// }
+export {};
+declare global {
+	namespace Cypress {
+		interface Chainable {
+			getByDataId(dataId: string): Chainable<JQuery<Element>>;
+		}
+	}
+}
 
 Cypress.Commands.overwrite(
 	"visit",
@@ -51,3 +49,7 @@ Cypress.Commands.overwrite(
 		return originalFn(url, options);
 	}
 );
+
+Cypress.Commands.add("getByDataId", (dataId: string) => {
+	return cy.get(`[data-id=${dataId}]`);
+});
