@@ -1,10 +1,14 @@
-import { createUser, generateRandomEmail } from "../login.selector";
+import {
+	createUser,
+	generateRandomEmail,
+	loginPageEmailField,
+	loginPagePasswordField,
+} from "../login.selector";
 import {
 	DEFAULT_VALID_PASSWORD,
 	EXISTING_EMAIL,
 	LOGIN_PAGE,
 } from "../constants";
-
 
 describe("exist user", () => {
 	beforeEach(() => {
@@ -30,16 +34,13 @@ describe("exist user", () => {
 
 	context("login success", () => {
 		it("can finish login process", () => {
-			cy.get("input#loginRegisterEmail_email").type(EXISTING_EMAIL);
+			cy.get(loginPageEmailField).type(EXISTING_EMAIL);
+			cy.contains("button", "Continue").click();
 
-			cy.get("[data-id=loginRegisterEmail_submit]").click();
-
-			cy.get("input#LoginRegister_Login_password").type(DEFAULT_VALID_PASSWORD);
-
-			cy.get("[data-id=LoginRegister_Login_submitButton]").click();
+			cy.get(loginPagePasswordField).type(DEFAULT_VALID_PASSWORD);
+			cy.contains("button", "Login").click();
 
 			cy.get("[data-id=myAccountPage_pageHeader]").should("be.visible");
-
 			cy.contains("a", "Logout").click();
 		});
 	});

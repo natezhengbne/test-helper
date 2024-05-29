@@ -2,7 +2,7 @@ import { DEFAULT_VALID_PASSWORD } from "./constants";
 import { UserForm } from "./types";
 
 export const generateRandomEmail = () =>
-	`${Math.trunc(Math.random() * 1000000)}@new.com`;
+	`${Math.trunc(Math.random() * 1000000)}@random-email.com`;
 
 type CreateUserProps = {
 	user?: UserForm;
@@ -25,7 +25,7 @@ export const createUser = ({ user, options }: CreateUserProps = {}) => {
 		if (shouldSignup) {
 			cy.get("input#signup_form_password").type(DEFAULT_VALID_PASSWORD);
 			cy.get("input#signup_form_firstname").type(user?.firstName ?? "Rocky");
-			cy.get("input#signup_form_lastname").type(user?.lastName ?? "Balboa");
+			cy.get("input#signup_form_lastname").type(user?.lastName ?? "Rocket");
 
 			cy.get("[data-id=htmlControlContainer_wrapper_signup_form_dob]")
 				.click()
@@ -69,3 +69,6 @@ export const createUser = ({ user, options }: CreateUserProps = {}) => {
 
 	return cy.log(`${email} able to login now`);
 };
+
+export const loginPageEmailField = "input#loginRegisterEmail_email";
+export const loginPagePasswordField = "input#LoginRegister_Login_password";
