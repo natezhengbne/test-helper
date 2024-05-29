@@ -12,12 +12,17 @@ type CreateUserProps = {
 };
 
 export const createUser = ({ user, options }: CreateUserProps = {}) => {
+    cy.intercept("POST", "check-email").as("check-email");
+
 	const email = user?.email ?? generateRandomEmail();
 	cy.get("input#loginRegisterEmail_email").type(email);
-	cy.get("[data-id=loginRegisterEmail_submit]").click();
+	cy.contains("button", "Continue").click();
+    cy.wait("@check-email").its("response.statusCode").should("eq", 200);
 
 	cy.get("body").then(($body) => {
-		if ($body.find("input#LoginRegister_Login_password").length > 0) {
+		const shouldSignup =
+			$body.find("[data-id=htmlInput_signup_form_email]").length > 0;
+		if (shouldSignup) {
 			cy.get("input#signup_form_password").type(DEFAULT_VALID_PASSWORD);
 			cy.get("input#signup_form_firstname").type(user?.firstName ?? "Rocky");
 			cy.get("input#signup_form_lastname").type(user?.lastName ?? "Balboa");
@@ -39,15 +44,28 @@ export const createUser = ({ user, options }: CreateUserProps = {}) => {
 
 			cy.get("input#signup_form_phone").type("0400000000");
 
-			cy.get("label#checkboxField_signup_form_agree").click();
+			// click it if present
+			cy.get("label#checkboxField_signup_form_agree")
+				.should((_) => {})
+				.then(($checkbox) => {
+					if ($checkbox.length) {
+						cy.wrap($checkbox).click();
+					}
+				});
 
-			cy.get("[data-id=signup_form_submitButton]").click();
-
-			cy.get("[data-id=myAccountPage_pageHeader]").should("be.visible");
+			cy.contains("button", "Create Account").click();
 
 			if (options?.logoutAfterSignup) {
-				cy.get("li#summarySubNavigation_logout").children().first().click();
+				return cy.contains("a", "Logout").click();
+			} else {
+				return cy
+					.get("[data-id=myAccountPage_pageHeader]")
+					.should("be.visible");
 			}
 		}
+
+		return cy.log(`${email} already exists`);
 	});
+
+	return cy.log(`${email} able to login now`);
 };

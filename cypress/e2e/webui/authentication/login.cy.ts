@@ -5,9 +5,10 @@ import {
 	LOGIN_PAGE,
 } from "../constants";
 
+
 describe("exist user", () => {
 	beforeEach(() => {
-        // prepare the existing user
+		// create user for testing
 		cy.visit(LOGIN_PAGE);
 		createUser({
 			user: {
@@ -38,6 +39,8 @@ describe("exist user", () => {
 			cy.get("[data-id=LoginRegister_Login_submitButton]").click();
 
 			cy.get("[data-id=myAccountPage_pageHeader]").should("be.visible");
+
+			cy.contains("a", "Logout").click();
 		});
 	});
 
