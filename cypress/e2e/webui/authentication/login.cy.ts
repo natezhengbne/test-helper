@@ -1,7 +1,7 @@
 import { checkEmail, userSignup, generateRandomEmail, loginDataId, registerDataId } from "../login.selector";
 import { DEFAULT_VALID_PASSWORD, EXISTING_EMAIL, LOGIN_PAGE } from "../constants";
 
-describe("exist user", () => {
+describe("existing user", () => {
     beforeEach(() => {
         // create user for testing
         cy.visit(LOGIN_PAGE);
@@ -33,7 +33,7 @@ describe("exist user", () => {
             cy.getByDataId(loginDataId.email).type(EXISTING_EMAIL);
             cy.getByDataId(loginDataId.continueButton).click();
 
-            cy.get(loginDataId.password).type(DEFAULT_VALID_PASSWORD);
+            cy.getByDataId(loginDataId.password).type(DEFAULT_VALID_PASSWORD);
             cy.getByDataId(loginDataId.loginButton).click();
 
             cy.get("[data-id=myAccountPage_pageHeader]").should("be.visible");
@@ -48,7 +48,7 @@ describe("exist user", () => {
 
             cy.getByDataId(registerDataId.email).should("be.visible").clear().type(EXISTING_EMAIL).blur();
 
-            cy.get(loginDataId.password).should("be.visible").type(DEFAULT_VALID_PASSWORD);
+            cy.getByDataId(loginDataId.password).should("be.visible").type(DEFAULT_VALID_PASSWORD);
 
             cy.getByDataId(loginDataId.loginButton).click();
 

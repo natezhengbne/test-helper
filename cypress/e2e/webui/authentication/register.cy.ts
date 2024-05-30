@@ -3,7 +3,7 @@ import { LOGIN_PAGE } from "../constants";
 
 describe("new user", () => {
     context("signup successfully", () => {
-        it("can finish the signup process", () => {
+        it("can finish with address autocomplete", () => {
             const email = generateRandomEmail();
             cy.visit(LOGIN_PAGE);
             checkEmail(email);
@@ -12,21 +12,24 @@ describe("new user", () => {
     });
 
     context("email suggestion", () => {
+        const incorrectEmail = "xxx@gnail.com";
+        const suggestedEmail = "xxx@gmail.com";
+
         beforeEach(() => {
             cy.visit(LOGIN_PAGE);
-            checkEmail("xxxx@gnail.com");
+            checkEmail(incorrectEmail);
         });
 
         it("can display and select the suggestion", () => {
-            cy.getByDataId(loginDataId.typoSuggestion).contains("xxxx@gmail.com").click();
-            cy.getByDataId(registerDataId.email).should("have.value", "xxxx@gmail.com");
+            cy.getByDataId(loginDataId.typoSuggestion).contains(suggestedEmail).click();
+            cy.getByDataId(registerDataId.email).should("have.value", suggestedEmail);
         });
 
         it("can ignore the suggestion", () => {
-            cy.getByDataId(loginDataId.typoSuggestion).contains("xxxx@gmail.com");
+            cy.getByDataId(loginDataId.typoSuggestion).contains(suggestedEmail);
             cy.getByDataId(loginDataId.continueButton).click();
 
-            cy.getByDataId(registerDataId.email).should("have.value", "xxxx@gnail.com");
+            cy.getByDataId(registerDataId.email).should("have.value", incorrectEmail);
         });
     });
 });
