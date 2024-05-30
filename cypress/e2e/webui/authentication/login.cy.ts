@@ -1,17 +1,22 @@
-import { createUser, generateRandomEmail, loginDataId, registerDataId } from "../login.selector";
+import { checkEmail, userSignup, generateRandomEmail, loginDataId, registerDataId } from "../login.selector";
 import { DEFAULT_VALID_PASSWORD, EXISTING_EMAIL, LOGIN_PAGE } from "../constants";
 
 describe("exist user", () => {
     beforeEach(() => {
         // create user for testing
         cy.visit(LOGIN_PAGE);
-        createUser({
-            user: {
-                email: EXISTING_EMAIL,
-            },
-            options: {
-                logoutAfterSignup: true,
-            },
+        checkEmail(EXISTING_EMAIL);
+        cy.get("body").then(($body) => {
+            const isNonExisting = $body.find(`[data-id=${registerDataId.email}]`).length > 0;
+            if (isNonExisting) {
+                userSignup({
+                    options: {
+                        logoutAfterSignup: true,
+                    },
+                });
+            }
+
+            return cy.log("finished data preparation");
         });
 
         cy.url().then((url) => {

@@ -1,11 +1,13 @@
-import { checkEmail, createUser, loginDataId, registerDataId } from "../login.selector";
+import { checkEmail, userSignup, generateRandomEmail, loginDataId, registerDataId } from "../login.selector";
 import { LOGIN_PAGE } from "../constants";
 
 describe("new user", () => {
     context("signup successfully", () => {
         it("can finish the signup process", () => {
+            const email = generateRandomEmail();
             cy.visit(LOGIN_PAGE);
-            createUser();
+            checkEmail(email);
+            userSignup();
         });
     });
 

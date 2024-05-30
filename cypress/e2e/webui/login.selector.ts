@@ -10,8 +10,10 @@ export const generateRandomEmail = () => `${Math.trunc(Math.random() * 1000000)}
  * @param email type email to see if it is a new one or existing one
  */
 export const checkEmail = (email: string) => {
+    cy.intercept("POST", "check-email").as("check-email");
     cy.getByDataId(loginDataId.email).type(email);
     cy.getByDataId(loginDataId.continueButton).click();
+    cy.wait("@check-email").its("response.statusCode").should("eq", 200);
 };
 
 type CreateUserProps = {
@@ -21,59 +23,44 @@ type CreateUserProps = {
     };
 };
 
-export const createUser = ({ user, options }: CreateUserProps = {}) => {
-    cy.intercept("POST", "check-email").as("check-email");
+export const userSignup = ({ user, options }: CreateUserProps = {}) => {
+    cy.getByDataId(registerDataId.password).type(DEFAULT_VALID_PASSWORD);
+    cy.getByDataId(registerDataId.firstName).type(user?.firstName ?? "Rocky");
+    cy.getByDataId(registerDataId.lastName).type(user?.lastName ?? "Rocket");
 
-    const email = user?.email ?? generateRandomEmail();
-    checkEmail(email);
-    cy.wait("@check-email").its("response.statusCode").should("eq", 200);
+    cy.getByDataId(registerDataId.dob)
+        .click()
+        .get("select#day")
+        .select(user?.birthday?.day ?? "01")
+        .get("select#month")
+        .select(user?.birthday?.month ?? "01")
+        .get("select#year")
+        .select(user?.birthday?.year ?? "2005");
 
-    cy.get("body").then(($body) => {
-        const shouldSignup = $body.find(`[data-id=${registerDataId.email}]`).length > 0;
-        if (shouldSignup) {
-            cy.getByDataId(registerDataId.password).type(DEFAULT_VALID_PASSWORD);
-            cy.getByDataId(registerDataId.firstName).type(user?.firstName ?? "Rocky");
-            cy.getByDataId(registerDataId.lastName).type(user?.lastName ?? "Rocket");
+    cy.getByDataId(registerDataId.addressAutocomplete)
+        .type(user?.addressAutocomplete ?? "1 Queen Street, VIC")
+        .getByDataId(registerDataId.addressSuggestion)
+        .first()
+        .click();
 
-            cy.getByDataId(registerDataId.dob)
-                .click()
-                .get("select#day")
-                .select(user?.birthday?.day ?? "01")
-                .get("select#month")
-                .select(user?.birthday?.month ?? "01")
-                .get("select#year")
-                .select(user?.birthday?.year ?? "2005");
+    cy.getByDataId(registerDataId.phone).type("0400000000");
 
-            cy.getByDataId(registerDataId.addressAutocomplete)
-                .type(user?.addressAutocomplete ?? "1 Queen Street, VIC")
-                .getByDataId(registerDataId.addressSuggestion)
-                .first()
-                .click();
-
-            cy.getByDataId(registerDataId.phone).type("0400000000");
-
-            // click it if present
-            cy.get("label#checkboxField_signup_form_agree")
-                .should((_) => {})
-                .then(($checkbox) => {
-                    if ($checkbox.length) {
-                        cy.wrap($checkbox).click();
-                    }
-                });
-
-            cy.getByDataId(registerDataId.submitButton).click();
-
-            if (options?.logoutAfterSignup) {
-                return cy.contains("a", "Logout").click();
-            } else {
-                return cy.get("[data-id=myAccountPage_pageHeader]").should("be.visible");
+    // click it if present
+    cy.get("label#checkboxField_signup_form_agree")
+        .should((_) => {})
+        .then(($checkbox) => {
+            if ($checkbox.length) {
+                cy.wrap($checkbox).click();
             }
-        }
+        });
 
-        return cy.log(`${email} already exists`);
-    });
+    cy.getByDataId(registerDataId.submitButton).click();
 
-    return cy.log(`${email} able to login now`);
+    if (options?.logoutAfterSignup) {
+        return cy.contains("a", "Logout").click();
+    } else {
+        return cy.get("[data-id=myAccountPage_pageHeader]").should("be.visible");
+    }
 };
 
 export const loginDataId = {
